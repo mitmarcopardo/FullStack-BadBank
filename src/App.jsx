@@ -12,11 +12,11 @@ import Balance from '/public/components/balance.jsx';
 import AllData from '/public/components/alldata.jsx';
 import { UserProvider } from '/public/provider/UserProvider';
 
+
 function App() {
   return (
     <>
     <UserProvider>
-  
       <NavBar/>
       <Container className=''>
         <Routes>

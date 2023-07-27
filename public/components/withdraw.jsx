@@ -4,110 +4,90 @@ import { UserContext, Cards } from "./context";
 import { Card, Button } from "react-bootstrap";
 import { useContext, useState } from "react";
 
+
 function Withdraw(){
-    const [amount, setAmount] = useState('');
-    const [show, setShow] = useState();
-    const [status, setStatus] = useState('');
-    const ctx = useContext(UserContext);
-    console.log(Object.keys(ctx.currentUser).length);
+  const [amount, setAmount] = useState();
+  const [show, setShow] = useState();
+  const [status, setStatus] = useState('');
+  const ctx = useContext(UserContext);
+  const [balance, setBalance] = useState(ctx.currentUser.balance);
 
-    function Update(){
-        if (!validateField(amount, 'deposit'))       return;
-        if (!validateFieldupper(amount, 'deposit'))       return;
-    }
     
-    function validateField(field, label){
-        if (!field){
-            setStatus('Error: ' + label + ' is empty');
-            setTimeout( () => setStatus(''),3000);
-            return false;
-        }
-        return true;
-    }
     
-    function validateFieldupper(field){
-        if (field > 0){
-            ctx.currentUser.balance = ctx.currentUser.balance + amount;
-            setStatus('Depsit done!');
-            ctx.userHistory.push(`Deposit: +${amount}`);
-            console.log(ctx.hst);
-            setAmount('')
-            setTimeout( () => setStatus(''),2000);
-            return true;}
-        if (field == 0){
-            setStatus('Error: an amount of 0 cant be deposit');
-            setTimeout( () => setStatus(''),3000);
-            return false;}
-        if (field < 0){
-            setStatus('Error: an amount lower than 0 cant be deposit');
-            setTimeout( () => setStatus(''),3000);
-            return false;}
-    }
-
     return(
         <>
             <Cards
-                header={Object.keys(ctx.currentUser).length > 0 ? 'Transaction: Deposit' : 'Login Page' } 
+                header={ctx.loggedIn ? 'Transaction: Withdraw' : 'Login Page' } 
                 status={status}
-                body={Object.keys(ctx.currentUser).length > 0 ? <DepositForm setShow={setShow}/> : <LoginForm setShow={setShow}/> } 
+                body={<> Current Balance <br></br>${balance} <br></br>/-----------------------------/<br></br><WithdrawForm setBalance={setBalance} setStatus={setStatus}/> </>} 
             />
         </>
 );
         
 }
-function DepositForm(props){
-    const [email, setEmail] = useState('');
-    const [balance, setBalance] = useState(0);
+function WithdrawForm(props){
+    const [amount, setAmount] = useState();
     const ctx = useContext(UserContext);
 
     
   
     function handle(){
-      
-      props.setShow(true);
-      ctx.currentUser = ctx.users[0];
-      console.log(ctx.currentUser);
+      if(!validateField(amount, 'Amount'))  return;
+      if(!validateFieldupper(amount))      return;
+
+      const url = `http://localhost:3001/account/update/${ctx.currentUser.email}/${ctx.currentUser.balance}`;
+      fetch(url)
+      .then(response => response.json())
+      .catch((error) => console.error("Error:", error));
+
     }
+
+    function validateField(field, label){
+      if (!field){
+          props.setStatus('Error: ' + label + ' field is empty ');
+          setTimeout( () => props.setStatus(''),3000);
+          return false;
+      }
+      return true;
+  }
+
+    function validateFieldupper(field){
+      if (field > 0 && field <= ctx.currentUser.balance ){
+          props.setBalance(ctx.currentUser.balance = (JSON.parse(ctx.currentUser.balance)) - amount);
+          props.setStatus('Money Withdrawn done!');
+         // ctx.userHistory.Whitdraws[`${new Date().toUTCString().slice(5, 25)}`] = field;
+          console.log(ctx.userHistory);
+          setAmount(0)
+          setTimeout( () => props.setStatus(''),1500);
+          return true;}
+      if (field == 0){
+          props.setStatus('Error: an amount of 0 cant be withdrawn');
+          setTimeout( () => props.setStatus(''),1500);
+          return false;}
+      if (field < 0){
+
+          props.setStatus('Error: an amount lower than 0 cant be withdrawn');
+          setTimeout( () => props.setStatus(''),1500);
+       
+        }
+
+          return false;
+        }
+
+
+
   
     return(
         <>    
             <Card.Text className='txt-body'>
-              Email Address<br/>
-              <input type="input" className="from-control" id="email"
-              placeholder="Enter email" value={email} onChange={ e => setEmail(e.currentTarget.value) }/><p/>
+              Amount<br/>
+              $<input type="number" className="from-control text-center form-control-sm ms-2" id="amount"
+              placeholder="Enter Amount" value={amount} onChange={ e => setAmount(parseFloat(e.currentTarget.value)) }/><p/>
   
-              <button type="submit" className="btn btn-primary" onClick={() => {ctx.currentUser.balance += setBalance }}>Deposit</button>
+              <button type="submit" className="btn btn-primary" onClick={handle} disabled={ ctx.currentUser.balance <= 0 ? (true) : (false) }>Withdraw</button>
             </Card.Text>
           
     </>);
   }
   
-
-  function LoginForm(props){
-    const ctx = useContext(UserContext);
-  
-    function handle(){
-      ctx.loggedIn = true;
-      props.setShow(true);
-      ctx.currentUser = ctx.users[0];
-    }
-  
-    return(
-        <>    
-            <Card.Text className='txt-body'>
-              Email Address<br/>
-              <input type="input" className="from-control" id="email"
-              placeholder="Enter email" value={props.email} onChange={ e => props.setEmail(e.currentTarget.value) }/><p/>
-              
-              Password<br/>
-              <input type="input" className="from-control" id="password"
-              placeholder="Enter Password" value={props.password} onChange={ e => props.setPassword(e.currentTarget.value) }/><p/>
-  
-              <button type="submit" className="btn btn-primary" onClick={handle}>Login</button>
-            </Card.Text>
-          
-    </>);
-  }
-
-
 export default Withdraw

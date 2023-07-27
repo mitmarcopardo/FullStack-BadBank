@@ -13,7 +13,7 @@ export const UserProvider = ({children}) => {
           balance:100
           }],
           currentUser:[],
-          userHistory: {},
+          userHistory: {'Deposit':{},'Whitdraws:':{}},
           loggedIn: false
       };
 

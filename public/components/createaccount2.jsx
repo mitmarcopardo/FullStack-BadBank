@@ -31,24 +31,18 @@ function CreateForm(props){
   const [sudo, setSudo] = useState(false);
   const [count, setCount] = useState(1);
   const ctx = useContext(UserContext);
-
+  const [validate, setValidate] = useState(false);
   const handleOnChange = () => {
     setCount(count + 1);
     console.log(count);
   };
 
   async function Handle(){
-
-    if(Search(email)){
-
-    const url = `http://localhost:3001/account/create/${name}/${email}/${password}/${!sudo}`
-    fetch(url)
-    .then(response => response.json())
-    .then(data => console.log(data))
-    .catch((error) => console.error("Error:", error));
-    
-    }
-
+      props.setShowModal(true);
+      const url = `http://localhost:3001/account/create/${name}/${email}/${password}/${!sudo}`
+      fetch(url)
+      .then(response => response.json())
+      .catch((error) => console.error("Error:", error));
   }
 
   useEffect( () => {
@@ -59,36 +53,43 @@ function CreateForm(props){
     if (!validateField(name,        'name'))       return;
     if (!validateField(email,        'email'))       return;
     if (!validateField(password,     'password'))    return;
-    if (!pwLength(password,     'password'))    return;
-
-    Handle();
+    if (pwLength(password.length,     'password'))    return;
+    Search(email)
+    
   }
 
-  async function Search(email){
-    
+  function Search(email){
+
     const url = `http://localhost:3001/account/search/${email}`
- 
+
       fetch(url)
-      .then(async response => {
+      .then( async response => {
         try{
-          const data = await response.json()
-          console.log(data);
-          if(data.length === 0) { 
-              return true
+          const data =  await response.json();
+          if(data.length < 1) { 
+            setValidate(true);
+              return  true;
           }else{
             props.setStatus('Error: User already exist ( Email )');
             setTimeout( () => props.setStatus(' '),3000);
-          return false;
+            return false;
             }
         }catch(error){
             console.log('Error happened here!')
             console.error(error)
             return false;
           }
-    })
+    }).catch( e => console.log(e));
+
+/*
+    then( () => console.log('Database Online'))
+    .catch( e => console.log(e));
+*/
+
   }
 
   function validateField(field, label){
+    Search(email);
     if (!field){
         props.setStatus('Error: ' + label);
         setTimeout( () => props.setStatus(''),3000);
@@ -98,12 +99,12 @@ function CreateForm(props){
   }
 
   function pwLength(field, label){
-    if (field.lenght<8){
-        props.setStatus('Error: ',label, ' Password must be longer the 8 characters');
-        setTimeout( () => props.setStatus(''),3000);
-        return false;
+    if (field < 8){
+      props.setStatus('Error: ' + label + ' is not longer that 8 characters ');
+      setTimeout( () => props.setStatus(''),3000);
+        return true;
     }
-    return true;
+    return false;
   }
 
 
@@ -116,7 +117,7 @@ return(
           placeholder="Enter name" value={name} onChange={ e => setName(e.currentTarget.value) }/><p/>
           
           Email Address<br/>
-          <input type="input" className="from-control" id="email"
+          <input type="email" className="from-control" id="email"
           placeholder="Enter email" value={email} onChange={ e => setEmail(e.currentTarget.value) }/><p/>
           
           Password<br/>
@@ -132,9 +133,9 @@ return(
                 />
 
           
-          <button type="submit" className="btn btn-primary" onClick={() => {
+          <button type="submit" className="btn btn-primary" onMouseDown={() => {
             loggedIn();
-            props.setShowModal(true);
+            validate ? (Handle()) : ('');
             }}>Create</button>
         </Card.Text>
       

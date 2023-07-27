@@ -28,10 +28,10 @@ app.get('/account/create/:name/:email/:password/:sudo', function (req, res){
 
 
 // login user
-app.get('/account/login/:email/:password', function (req, res){
-    const dalf = dal.login(req.params.email, req.params.password)
+app.get('/account/login/:email', function (req, res){
+    const dalf = dal.login(req.params.email)
     .then((doc) => {
-        console.log(doc);
+        console.log('login ', doc);
         res.send(doc);
     })
     .catch((error) => console.error("Error:", error));
@@ -41,18 +41,35 @@ app.get('/account/login/:email/:password', function (req, res){
 app.get('/account/search/:email', function (req, res){
     const dalf = dal.search(req.params.email)
     .then((doc) => {
+        console.log('search ', doc);
         res.send(doc);
     })
     .catch((error) => console.error("Error:", error));
 });
 
-// Deposit
-// Whitdraw
+// Deposit n whitdraw
+app.get('/account/update/:email/:balance', function (req, res){
+    // else create user
+    const dalf = dal.update(req.params.email, req.params.balance)
+    .then( (user) => {
+        console.log(user);
+        res.send(user);
+    } );
+});
+
+
 // Balance
+app.get('/account/balance/:email', function (req, res){
+    // else create user
+    const dalf = dal.balance(req.params.email)
+    .then( (user) => {
+        console.log(user);
+        res.send(user);
+    } );
+});
 
-//////////// ------------- all accounts with DAL
-// all accounts DAL
 
+// All
 app.get('/account/all', function (req, res){
     const dalf = dal.all()
     .then( (docs) => {

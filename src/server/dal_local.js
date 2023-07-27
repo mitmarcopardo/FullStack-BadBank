@@ -3,7 +3,10 @@
 //import mongoose from 'mongoose';
 import { MongoClient, ServerApiVersion } from 'mongodb';
 
-const uri = "mongodb://localhost:27017";
+//const uri = "mongodb://164.92.85.169/27017";
+const uri = "mongodb://localhost/27017";
+//const uri = "mongodb+srv://pardovmarco:8RpH0ODRSpjsBDkw@cluster0.bs2zqyr.mongodb.net/?retryWrites=true&w=majority";
+
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -47,7 +50,7 @@ export async function createUser( name, email, password, sudo ) {
     const client = new MongoClient(uri);
 
     await client.connect();
-
+// Cambiar "myProject" a 27017 para mongo in the cloud
     const allUsers = await client.db('myProject').collection('users').find({}, {projection:{ _id: 0 }}).toArray();
 
 
@@ -56,50 +59,78 @@ export async function createUser( name, email, password, sudo ) {
     }else{
         console.log(`No existing users`);
     }
-
+    await client.close();
     return JSON.stringify(allUsers)
 }
 
-export async function login(email, password){
-    const client = new MongoClient(uri);
-
-    client.connect();
-
-    const result   = await client.db("myProject").collection("users").find(
-      {
-        $and:[{email:{$in:[email]}},{password:{$in:[password]}}]
-        
-      }
-      ,{projection:{ _id: 0 }},
-    ).toArray();
-
-    if(result){
-        console.log('Desde el backend');
-        console.log(result);
-    }else{
-        console.log('not found')
-    }
-    
-
-    return JSON.stringify(result)
-}
-
-export async function search(email, password){
+export async function search(email){
   const client = new MongoClient(uri);
 
   client.connect();
 
   const result   = await client.db("myProject").collection("users").find(
     { email:email },
-    { projection:{ _id: 0, name: 0, password:0, balance:0, admin:0 } },
+    { projection:{ _id: 0, name: 0, balance:0, admin:0 } },
   ).toArray();
 
   if(result){
-      console.log(result);
+      console.log('DAL OK ' );
   }else{
       console.log('not found')
   }
   
+  await client.close();
+  return JSON.stringify(result)
+}
 
+export async function login(email){
+  const client = new MongoClient(uri);
+
+  client.connect();
+
+  const result   = await client.db("myProject").collection("users").find(
+    { email:email },
+    { projection:{ _id: 0 } },
+  ).toArray();
+
+  if(result){
+      console.log('DAL OK ', result );
+  }else{
+      console.log('not found')
+  }
+  
+  await client.close();
+  return JSON.stringify(result)
+}
+
+export async function update( email, balance) {
+  try {
+      const client = new MongoClient(uri);
+      client.connect();
+      // Update a document a document to insert
+      const result = await client.db("myProject").collection("users").updateOne( {email:email} , { $set: {balance : balance} } );
+      console.log(`Updated as: ${result.modifiedCount}`)
+      return result;
+  } finally {
+      await client.close();
+  }
+}
+
+export async function balance(email){
+  const client = new MongoClient(uri);
+
+  client.connect();
+
+  const result   = await client.db("myProject").collection("users").find(
+    { email:email },
+    { projection:{ _id: 0, name: 0, email: 0, password:0, admin:0 } },
+  ).toArray();
+
+  if(result){
+      console.log('DAL Balance OK ', result );
+  }else{
+      console.log('not found')
+  }
+  await client.close();
   return JSON.stringify(result)
 }

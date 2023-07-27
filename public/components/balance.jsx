@@ -1,31 +1,70 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Cards, UserContext } from "./context";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
+import axios from "axios";
+import { Modal, Spinner, Card } from "react-bootstrap";
 
 function Balance() {
     const ctx = useContext(UserContext);
+    const [datax, setData] = useState(null);
+    const [bul, setBul] = useState(false);
+    const [name, setName] = useState('');
+
+            
+    function Sear(){
+            const url = `http://localhost:3001/account/balance/${ctx.currentUser.email}`
+            axios.get(url)
+            .then(resp => {
+                setData(resp.data)
+            })
+            .finally()
+            console.log(datax)
+            return {datax}
+    }
+
+    useEffect( ()=>{
+        setTimeout(() => {
+            setBul(true);
+            
+        }, 3000);
+        Sear();
+        setBul(false);
+        setName(ctx.currentUser.name)
+    },[] )
+    
 
     return(
-        <Cards
-            bgcolor="primary"
-            label = "Data"
-            header = "BadBank Data Page"
-            title = "Account Details"
-            text = "BadBank Account Details"
-            body = { (ctx.loggedIn ? (
-                <>
-                Name: {ctx.currentUser.map( x => x.name)}<br/>
-                Email: {ctx.currentUser.map( x => x.email)}<br/>
-                Password: {ctx.currentUser.map( x => x.password)}<br/>
-                Balance ${ctx.currentUser.map( x => x.balance)}<br/>
-                Movements: {ctx.userHistory.map( (x) =><li key={x}>{ x }</li> )}<br/>
-                </>
-                ) : (
-                <>
-                <h2>Log in to get access</h2>
-                </>))}
-        />
+
+            <Cards
+                header={ bul ? ('Balance Page') : ('') } 
+                body={ bul ? (
+                    <Card.Text className='txt-body'>
+                    Welcome {name}<br/>
+                    <p>Your current balance is:</p>
+                    <p>$ {datax[0].balance}</p>
+                    </Card.Text>
+                ) : (<LoadBalance/>)  }
+                    
+            />
+
     );
 }
+
+function LoadBalance(){
+
+    return(
+        <>
+        <Modal.Header className='justify-content-center'>
+                <Modal.Title>Fetching Data!</Modal.Title>
+            </Modal.Header>
+            <Modal.Body className='text-center'>
+
+            <Spinner animation="border" variant="primary" className="my-5 py-2"/>
+            </Modal.Body>
+        </>
+    );
+    }
 
 export default Balance
 

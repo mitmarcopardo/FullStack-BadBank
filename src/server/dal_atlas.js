@@ -56,7 +56,7 @@ export async function createUser( name, email, password ) {
     }else{
         console.log(`No existing users`);
     }
-
+    await client.close();
     return JSON.stringify(allUsers)
 }
 
