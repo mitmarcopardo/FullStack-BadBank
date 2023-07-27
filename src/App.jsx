@@ -20,13 +20,13 @@ function App() {
       <NavBar/>
       <Container className=''>
         <Routes>
-          <Route path='/' index element={<Home/>}/>
-          <Route path='/createaccount2' element={<CreateAccount/>}/>
-          <Route path='/login' element={<Login/>}/>
-          <Route path='/deposit' element={<Deposit/>}/>
-          <Route path='/withdraw' element={<Withdraw/>}/>
-          <Route path='/balance' element={<Balance/>}/>
-          <Route path='/alldata' element={<AllData/>}/>
+          <Route path='./' index element={<Home/>}/>
+          <Route path='./createaccount2' element={<CreateAccount/>}/>
+          <Route path='./login' element={<Login/>}/>
+          <Route path='./deposit' element={<Deposit/>}/>
+          <Route path='./withdraw' element={<Withdraw/>}/>
+          <Route path='./balance' element={<Balance/>}/>
+          <Route path='./alldata' element={<AllData/>}/>
         </Routes>
       </Container>
 
